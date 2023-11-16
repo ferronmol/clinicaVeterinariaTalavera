@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -8,6 +10,7 @@
         <title>Clinica Veterinaria Talavera</title>
     </head>
     <body>
+        <a href="./pages/crud.php">Ir a crud</a>
         <header class= "info">
             <h1 class="title">aplicación creada por:</h1>
             <div class="personal_data">

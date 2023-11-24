@@ -3,9 +3,9 @@ require '../files/functions.php';
 $user = 'Laura';
 $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
 //comprobamos si existe usuario desde ela rchivo requerido anterior se maneja esta posibilidad y se guarda en una variable
-if (isset($user)) {
+if (isset($dni)) {
     //rezlimaos la consulta para sacar por pantalla los nombres de las mascotas del usuario para qeu pueda eleir una de ellas
-    $sql = "select nombre,especie,raza,edad,fechaNacimiento,peso from mascotas where dni_propietario in (SELECT dni from personas where nombre = '$user')";
+    $sql = "select nombre,especie,raza,edad,fechaNacimiento,peso from mascotas where dni_propietario in (SELECT dni from personas where dni = '$dni')";
     $mascotas = selectValues($bd, $sql);
 }
 //Cerramos la conexión con la base de datos 
@@ -22,7 +22,7 @@ $bd = null;
         <title>Clinica Veterinaria Talavera</title>
     </head>
     <body>
-        <header class= "info">
+        <header class= "container info">
             <h1 class="title">Aplicación creada por:</h1>
             <div class="personal_data">
                 <p>Nombre: Juan Ferrón Paterna</p>
@@ -31,7 +31,7 @@ $bd = null;
                 <p>Módulo: Desarrollo web en entorno servidor (DWES)</p>
             </div>
         </header>
-        <div>
+        <div class='container'>
             <main class="main">
                 <?php
                 //Controlamos si existe la consulta si a devulto algo para poder controlar los errores
@@ -82,8 +82,10 @@ $bd = null;
                                         <td class="td">
                                             <select class="select" name="vaccines">
                                                 <?php
+//                                                createOption($vacunas);
                                                 foreach ($vacunas as $vacuna) {
                                                     //para cada creamos una etiqueta option y la rellenamos con el nmbre de la vacuna
+                                                    
                                                     ?>
                                                     <option class="option" name="vaccine" value="">
                                                         <?php
@@ -109,8 +111,6 @@ $bd = null;
                                 <?php
                             }
                             ?>
-        <!--<td class="td">Hola</th>-->
-
                         </tbody>
                     </table>
                     <?php

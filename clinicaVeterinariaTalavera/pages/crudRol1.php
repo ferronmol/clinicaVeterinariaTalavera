@@ -10,19 +10,23 @@ if (isset($user)) {
 
 //filtramos el formulario que nos viene por post
     if (filter_input_array(INPUT_POST)) {
-        if (isset($_POST['update'])) {
+        if (isset($_POST['update'])) { //condicional para cuando recibimos una peticion de modificación
             $update = htmlspecialchars($_POST['update']);
         }
-        if (isset($_POST['delete'])) {
+        if (isset($_POST['delete'])) { //condicional para cuando recibimos una peticion de eliminación
             $delete = htmlspecialchars($_POST['delete']);
             //Llamamos a una funcion para borrar los datos
-            statement($bd, createDeleteStatement($bd,'personas',$delete));
+            statement($bd, createDeleteStatement($bd, 'personas', $delete));
         }
-        if (isset($_POST['commit'])) {
+        if (isset($_POST['commit'])) { //condicional para cuando recibimos una peticion de confirmación
             $commit = htmlspecialchars($_POST['commit']);
             //Llamamos a la función para crear una consulta de update y lo que nos devulve esa función se lo pasamos
             //como parametro a ala función padre apra generar la consulta a la base de datos
             statement($bd, createUpdateStatement('personas', $_POST));
+        }
+        if (isset($_POST['insert'])) { //condicional para cuando recibimos una peticion de insercción
+            $insert = htmlspecialchars($_POST['insert']);
+            statement($bd, createInsertStatement('personas', $_POST));
         }
     }
     //rezlimaos la consulta para sacar por pantalla los nombres de todos los usuarios de la veterinaria
@@ -45,18 +49,18 @@ $bd = null;
     </head>
     <body>
         <div class='container'>
-        <header class= "info">
-            <h1 class="title">Aplicación creada por:</h1>
-            <div class="personal_data">
-                <p>Nombre: Juan Ferrón Paterna</p>
-                <p>Nombre: Javier Rocha </p>
-                <p>Curso: 2º DAW</p>
-                <p>Módulo: Desarrollo web en entorno servidor (DWES)</p>
-            </div>
-        </header>
-        
+            <!--            <header class= "info">
+                            <h1 class="title">Aplicación creada por:</h1>
+                            <div class="personal_data">
+                                <p>Nombre: Juan Ferrón Paterna</p>
+                                <p>Nombre: Javier Rocha </p>
+                                <p>Curso: 2º DAW</p>
+                                <p>Módulo: Desarrollo web en entorno servidor (DWES)</p>
+                            </div>
+                        </header>-->
+
             <main class="main">
-                <h2>Estas son tus mascotas <?= $user ?></h2>
+                <h2>Usuarios de la Clínica</h2>
                 <table border="1">
                     <thead>
                         <tr class='tr'>
@@ -119,7 +123,7 @@ $bd = null;
                                         <select class="select" name="puppies">
                                             <!--Llamamos a la función para generar todas las mascotas de cada uno de los clientes-->
                                             <?php
-                                            generatePuppies($mascotas);
+                                            createOption($mascotas);
                                             //cerramos la etiqueta select
                                             ?>
                                         </select>
@@ -133,7 +137,7 @@ $bd = null;
                                         //condicinal para controlar que input se va a generar dependiendo de si se ha encontrado el cliente a modificar
                                         if ($matches) {
                                             //Llamamos a la funcion para generar un input mandandole parametros especificos
-                                            createInput('dni', $client['dni'], false, true);
+                                            createInput('dni', $client['dni'], false, true, 'hidden');
                                             //Llamamos a la funcion para generar un boton de confirmar
                                             createButton('commit', $client['nombre'], 'Confirmar', 'bg-success');
                                         } else {
@@ -155,8 +159,16 @@ $bd = null;
                     </tbody>
                 </table>
                 <!--final de la tabla de informacion de las cosnultas--> 
-                <?php ?>
+                <!--creación de tabla para la insercción de un nuevo cliente-->
+                <h2>Insercción de un nuevo ususario</h2>
+                <table border='1'>
+                    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
+                        <?php
+                        createFormInsert();
+                        ?>
+                    </form>
 
+                </table>
             </main>
             <footer class="footer">
 

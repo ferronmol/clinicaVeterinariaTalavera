@@ -5,9 +5,11 @@ session_start();
 //varible booleana para guardar si hay errores a la hora de acceder a la pagina
 $error = false;
 $rol = 1;
-if (isset($_SESSION['user']) && isset($_SESSION['rol'])) {
+$dni = '123456789A';
+if (isset($_SESSION['user']) && isset($_SESSION['rol']) && isset($_SESSION['dni'])) {
     $user = htmlspecialchars($_POST['user']);
     $rol = htmlspecialchars($_POST['rol']);
+    $dni = htmlspecialchars($_POST['sni']);
 }
 ?>
 <!DOCTYPE html>

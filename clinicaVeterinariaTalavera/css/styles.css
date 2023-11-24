@@ -25,12 +25,14 @@
 }
 .form__input{
     text-align: center;
+    width: 120px;
 }
 .select{
     width: 100px;
 }
 table{
     border-collapse: separate;
+    margin-bottom: 40px;
 }
 .td,.tr{
     border: 1px solid black;
@@ -39,4 +41,11 @@ table{
 }
 .button{
     width: 100px;
+}
+.hidden{
+    display: none;
+}
+
+.error{
+    color: red;
 }

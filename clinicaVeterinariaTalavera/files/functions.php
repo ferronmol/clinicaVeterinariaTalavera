@@ -54,10 +54,10 @@ function statement($bd, $sql) {
  * @param Array $values
  * @return string
  */
-function createUpdateStatement($table, $values) {
+function createUpdateStatement($bd,$table, $values) {
     try {
         //guardamos el dni para luego usarlo como condicion del where
-        $dni = htmlspecialchars($values['dni']);
+        $dni = htmlspecialchars($values['commit']);
 //guardamos en un array nuevo solo los valores que vamos a necesitar
         $newValues = array_slice($values, 0, 4);
 //inicializamos la varible sql para ir generando la consulta acumulando los string
@@ -74,7 +74,6 @@ function createUpdateStatement($table, $values) {
 //Llamamos a etsa funcion para poder quitar la ultima coma y el espacio sel ultimo parametro de la consulta
         $sql = substr($sql, 0, -2);
         $sql .= " WHERE  dni = '$dni';";
-        echo $sql;
         return $sql;
     } catch (Exception $exc) {
         displayError('Los datos de la modificacion no son correctos, revisa que los campos cumplan con los requisitos especificados');
@@ -90,12 +89,8 @@ function createUpdateStatement($table, $values) {
  */
 function createDeleteStatement($bd, $table, $value) {
     try {
-        $sql;
-        if (is_numeric($value))
-            $sql = "DELETE FROM $table WHERE dni = $value";
-        else
-            $sql = "DELETE FROM $table WHERE dni = '$value'";
-
+        $dni = $value['delete'];
+        $sql = "DELETE FROM $table WHERE dni = '$dni'";
         return $sql;
     } catch (Exception $exc) {
         displayError('La eliminación no se ha podido realizar correctamente, intentalo de nuevo');
@@ -109,16 +104,17 @@ function createDeleteStatement($bd, $table, $value) {
  * @param Array $values
  * @return string
  */
-function createInsertStatement($table, $values) {
+function createInsertStatement($bd,$table, $values) {
+    //Realizamos esta operacion para quitarle el ultimo elemento del array de values que nos pasan como parametro 
+    $values = array_slice($values, 0,9);
     try {
         $sql = "INSERT INTO $table VALUES (";
         foreach ($values as $value) {
             if ($value != 'insert') {
-                if (is_numeric($value)) {
+                if($value === 'rol')
                     $sql .= "$value, ";
-                } else {
+                else
                     $sql .= "'$value', ";
-                }
             }
         }
         //Hacemos este metodo para eliminar la coma y el espacio del ultimo valor de la consulta
@@ -144,7 +140,7 @@ function createInput($name, $value,$type, $disabled = false, $hidden = false, $c
     $hidden = ($hidden) ? 'hidden' : '';
     if ($hidden === 'hidden') {
         ?>
-        <input class='form__input <?= $class ?>'  placeholder='<?= $placeholder ?>'  name="<?= $name ?>" value="<?= $value ?>" <?= $disabled ?> <?= $hidden ?>>
+<input class='form__input <?= $class ?>' type='<?= $type ?>'  placeholder='<?= $placeholder ?>'  name="<?= $name ?>" value="<?= $value ?>" <?= $disabled ?> <?= $hidden ?>>
         <?php
     } else {
         ?>
@@ -177,13 +173,19 @@ function createOption($mascotas) {
  * @param string $content
  * @param string $class
  */
-function createButton($name, $value, $content, $class = false) {
+function createButton($name, $value, $content, $class = false,$disabled = false) {
     $class = ($class) ? $class : "";
+    $disabled = ($disabled) ? 'disabled' : "";
     ?>
-    <button class='<?= $class ?> button' type="submit" name="<?= $name ?>" value="<?= $value ?>"><?= $content ?></button>
+    <button class='<?= $class ?> button' type="submit" name="<?= $name ?>" value="<?= $value ?>" <?= $disabled ?>><?= $content ?></button>
     <?php
 }
-
+/**
+ * funtion to get the correct type for a input based on s atrign given as paramenter
+ * 
+ * @param string $value
+ * @return string
+ */
 function toGetType($value){
     if($value === 'email')
         return 'email';
@@ -194,40 +196,71 @@ function toGetType($value){
     
     return 'text';
 }
-
-function createFormInsert() {
+/**
+ * funtion to create a form for a insert action
+ * 
+ * @param string $disabled
+ */
+function createFormInsert($disabled) {
     $fields = ['dni', 'nombre', 'apellido', 'fechaNacimiento', 'email', 'telefono', 'direccion', 'rol', 'clave'];
     $type = '';
+    
     ?>
     <tr class="tr">
         <?php
         foreach ($fields as $value) {
             if($value === 'rol'){
-                createInput($value, '',toGetType($value), true, false, '', 0);
+                createInput($value, 0,toGetType($value), false, false, '', 0);
             }else if($value === 'clave'){
                 //hay que hacer un metodo para cifrar la contraseña y mostrar axteriscos, a su vez esas claves tienen que meterse en un array o algo para tenerlas
-                createInput($value, '',toGetType($value), false, false, '', $value);
+                createInput($value, '',toGetType($value), $disabled, false, '', $value);
             }else {
-                createInput($value, '',toGetType($value), false, false, '', $value);
-            }
-                
-            
-            
-                
+                createInput($value, '',toGetType($value), $disabled, false, '', $value);
+            }     
         }
         ?>
         <td class="td">
             <?php
-            createButton('insert', 'insert', 'Insertar', 'bg-primary')
+            createButton('insert', 'insert', 'Insertar', 'bg-primary',$disabled);
             ?>
     </tr>
     <?php
 }
 
 //funtions about errors
-
+/**
+ * funtion to shoe a error put in a p tag a explanation for the error given as parameter
+ * 
+ * @param string $content
+ */
 function displayError($content) {
     ?>
     <p class='error'><?= $content ?></p>
     <?php
+}
+//functions about cookies
+
+/** function to callign other funtion to manage teh type of action user wants to complete
+ * 
+ * @param string $action
+ * @param string $statement name of a function
+ * @param bool $confirmationActive
+ * @param PDO $bd database object
+ * @param Array $values  $_POST global variable
+ */
+function managePost($action,$statement,&$confirmationActive,$bd,$values){
+            //Llamamos a una funcion para borrar los datos
+            
+             if ($action === 'yes') {//condicional para saber si el usuario confirma la modificación de los datos
+                //Deserialización del array que nos llega desde el formualrio de confirmación
+                $clearValues = unserialize(base64_decode($values['array']));
+                //Llamamos a la función para crear una consulta de delete y lo que nos devulve esa función se lo pasamos
+                //como parametro a ala función padre apra generar la consulta a la base de datos
+                statement($bd, $statement($bd, 'personas', $clearValues));
+            }
+            if ($action !== 'yes' && $action !== 'no') {
+                //Le damos el valor true a la varibale porque la confirmacion en estos momento esta activa
+                $confirmationActive = true;
+            }
+    
 }

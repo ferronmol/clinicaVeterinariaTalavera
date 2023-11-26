@@ -10,6 +10,17 @@
     align-items: center;
     padding: 10px;
 }
+.header{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 30px;
+    gap: 20px;
+}
+.btn{
+    color: white;
+}
 .form{
     padding: 10px;
     display: flex;

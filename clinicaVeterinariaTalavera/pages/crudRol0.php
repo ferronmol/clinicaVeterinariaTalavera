@@ -1,5 +1,5 @@
 <?php
-$user = 'Laura';
+
 $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
 //comprobamos si existe usuario desde ela rchivo requerido anterior se maneja esta posibilidad y se guarda en una variable
 if (isset($dni)) {

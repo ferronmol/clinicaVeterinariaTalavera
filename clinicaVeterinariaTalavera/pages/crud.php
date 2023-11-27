@@ -3,25 +3,32 @@
 require '../files/functions.php';
 //iniciamos sesion y guardamos el nombre de susuario qeu tenemos en la sesion en una variable una vz filtrado
 session_start();
-
-
-//varible booleana para guardar si hay errores a la hora de acceder a la pagina
-$error = false;
-$rol = 1;
-//$dni = '123456789A';
-//$dni = '04555666G';
-$dni = '987654321';
-$lastVisit = isset($_COOKIE[$dni]) ? $_COOKIE[$dni] : null;
+//Condicional para examnimar si las varibales de seesion obligatorias existen 
 if (isset($_SESSION['user']) && isset($_SESSION['rol']) && isset($_SESSION['dni'])) {
-    $user = htmlspecialchars($_POST['user']);
-    $rol = htmlspecialchars($_POST['rol']);
-    $dni = htmlspecialchars($_POST['dni']);
+    $user = htmlspecialchars($_SESSION['user']);
+    $rol = htmlspecialchars($_SESSION['rol']);
+    $dni = htmlspecialchars($_SESSION['dni']);
 }
-
-//condicional para saber si existe esta cookie, si ha expirado o el la primera vex que entra a la página
-////DESBLOQUEAT ESTE CODIGO PARA LA REALIZACION DE COOKIES DE SEXPIRACION DE SESION
-
-//$sessionCookie = isset($_COOKIE['seesionCookie']) ? $_COOKIE['sessionCookie'] : null; 
+//DESBLOQUEAR PARA QUE REDIRIGA AL INDEX EN EL CASO DE QUE NO SE CUMPLAN CON LOS REQUISITOS cuando no exiaten las variables que se crean cuando se inicia sesion
+//EVITS QUE SE PUEDA ENTRAR`PONIENDO LA URL DIRECTAMNETE
+//else{
+//    header('Location: ../index.php?error');
+//}
+//manejo de cookies
+//Condicional para saber si existe la respuesta al formulario de extensión de sesión
+if(isset($_POST['cookieExtend'])){
+    if($_POST['cookieExtend'] === 'yes'){//Condicional para ssaber si la repuesta es positiva para crear una nueva cookie con una duración de un minuto
+        setcookie(session_id().$dni,'session',time() + 1 *60);
+        //Redirciionamos a la mims página para que se cree la cookie
+        header('Location:./crud.php');
+        exit;
+    }
+    if($_POST['cookieExtend'] === 'no'){
+        header('Location: ./pages/logOut.php');
+    }
+}
+$sessionCookie = isset($_COOKIE[session_id().$dni]) ? $_COOKIE[session_id().$dni] : null;
+$lastVisit = isset($_COOKIE[$dni]) ? $_COOKIE[$dni] : null;//TENEMOS QUE PONER ESTE CODIGO ARRIBA Y SUSTITUIR LA VARIBALE DNI POR LA VARIBALE SDE SESSION DNI, LO PONDRIAMOS DEBAJO DEL CODNICIONAL DONDE SE FILTAR DOTOD LOS VALORES DE SESSSON
 
 //Condicinal para saber si se ha pulsado el boton de cerrar sesión
 if (isset($_POST['logout'])) { //falta meter en la condicin un or para cuando no existe ls seesion cookie
@@ -29,13 +36,11 @@ if (isset($_POST['logout'])) { //falta meter en la condicin un or para cuando no
     require 'logOut.php';
 }
 //condicional para saber si la cookie de sesion ha expirado y preguntar al usuario si quiere ectender su sesión
-if (!isset($sessionCookie)) {
-    //TENEMOS QUE LLAMAR A UN FIHCERO QUE NOS GENERE UN FORMULARIO DE EXTENSION DE SESION PARA GENERAR UNA NUEVA COOCKIE CON UNA DURACCION DE UN MINUTO
+if (!isset($sessionCookie)) {//Condicional para saber si la cookie de sesión esta activa o no para llamar al formulario de extensión de sesión
+    header('Location: ./cookieExtension.php');
+    exit;
 }
-//DESBLOQUEAR PARA QUE REDIRIGA AL INDEX EN EL CASO DE QUE NO SE CUMPLAN CON LOS REQUISITOS
-//else{
-//    header('Location: ../index.php?error');
-//}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -65,10 +70,10 @@ if (!isset($sessionCookie)) {
 
             </header>
             <?php
-            if ($rol === 0) {
+            if ($rol == 0) {
                 require '../pages/crudRol0.php';
             } else {
-                if ($rol === 1) {
+                if ($rol == 1) {
                     require '../pages/crudRol1.php';
                 }
             }

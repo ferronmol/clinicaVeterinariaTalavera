@@ -1,5 +1,4 @@
 <?php
-$user = 'Laura';
 if (isset($user)) {
 //declaramos una varible para poder controlar cuando un cliente esta bajo una accion del ususario
     $matches = false;

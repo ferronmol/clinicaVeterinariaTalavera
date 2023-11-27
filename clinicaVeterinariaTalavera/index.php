@@ -1,4 +1,18 @@
-
+<?php
+session_start();
+//$dni = '123456789A';
+//$dni = '04555666G';
+$dni = '987654321';
+$rol = 1;
+$user = 'Laura';
+$_SESSION['dni'] = $dni;
+$_SESSION['rol'] = $rol;
+$_SESSION['user'] = $user;
+echo 'esto es lo que vale el id '.session_id();
+//Creación de cookie de seesion con un minuto de duración
+$content = session_id().$dni;
+setcookie($content,'session',time() + 1 * 60,'/');
+?>
 
 <!DOCTYPE html>
 <html lang="es">

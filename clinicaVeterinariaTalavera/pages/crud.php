@@ -1,4 +1,3 @@
-
 <?php
 require '../files/functions.php';
 //iniciamos sesion y guardamos el nombre de susuario qeu tenemos en la sesion en una variable una vz filtrado
@@ -9,31 +8,36 @@ if (isset($_SESSION['user']) && isset($_SESSION['rol']) && isset($_SESSION['dni'
     $rol = htmlspecialchars($_SESSION['rol']);
     $dni = htmlspecialchars($_SESSION['dni']);
 }
-//DESBLOQUEAR PARA QUE REDIRIGA AL INDEX EN EL CASO DE QUE NO SE CUMPLAN CON LOS REQUISITOS cuando no exiaten las variables que se crean cuando se inicia sesion
-//EVITS QUE SE PUEDA ENTRAR`PONIENDO LA URL DIRECTAMNETE
-//else{
-//    header('Location: ../index.php?error');
-//}
-//manejo de cookies
+else{//Se redirige el usuario al index por que ha intentado entrar a la url sin estar identificado
+    header('Location: ../index.php?error');
+    exit;
+}
+
 //Condicional para saber si existe la respuesta al formulario de extensión de sesión
 if(isset($_POST['cookieExtend'])){
     if($_POST['cookieExtend'] === 'yes'){//Condicional para ssaber si la repuesta es positiva para crear una nueva cookie con una duración de un minuto
-        setcookie(session_id().$dni,'session',time() + 1 *60);
-        //Redirciionamos a la mims página para que se cree la cookie
+        setcookie(hash('sha256',session_id().$dni),'session',time() + 1 * 600);//Utilizaciñon del la funcion hash para encriptar la información
+        //Redirecionamos a la mims página para que se cree la cookie
         header('Location:./crud.php');
         exit;
     }
     if($_POST['cookieExtend'] === 'no'){
-        header('Location: ./pages/logOut.php');
+        require 'logOut.php';
+        exit;
     }
 }
-$sessionCookie = isset($_COOKIE[session_id().$dni]) ? $_COOKIE[session_id().$dni] : null;
-$lastVisit = isset($_COOKIE[$dni]) ? $_COOKIE[$dni] : null;//TENEMOS QUE PONER ESTE CODIGO ARRIBA Y SUSTITUIR LA VARIBALE DNI POR LA VARIBALE SDE SESSION DNI, LO PONDRIAMOS DEBAJO DEL CODNICIONAL DONDE SE FILTAR DOTOD LOS VALORES DE SESSSON
+//manejo de cookies
+if(isset($_COOKIE[hash('sha256',session_id().$dni)])){
+    setcookie(hash('sha256',session_id().$dni),'session',time() + 1 * 600,'/');
+}
+$sessionCookie = isset($_COOKIE[hash('sha256',session_id().$dni)]) ? $_COOKIE[hash('sha256',session_id().$dni)] : null;
+$lastVisit = isset($_COOKIE[hash('sha256',$dni)]) ? $_COOKIE[hash('sha256',$dni)] : null;
 
 //Condicinal para saber si se ha pulsado el boton de cerrar sesión
 if (isset($_POST['logout'])) { //falta meter en la condicin un or para cuando no existe ls seesion cookie
     echo 'entro en el condicinal';
     require 'logOut.php';
+    exit;
 }
 //condicional para saber si la cookie de sesion ha expirado y preguntar al usuario si quiere ectender su sesión
 if (!isset($sessionCookie)) {//Condicional para saber si la cookie de sesión esta activa o no para llamar al formulario de extensión de sesión

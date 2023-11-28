@@ -1,11 +1,10 @@
 <?php
-
 $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
 //comprobamos si existe usuario desde ela rchivo requerido anterior se maneja esta posibilidad y se guarda en una variable
 if (isset($dni)) {
     //rezlimaos la consulta para sacar por pantalla los nombres de las mascotas del usuario para qeu pueda eleir una de ellas
-    $sql = "select nombre,especie,raza,edad,fechaNacimiento,peso from mascotas where dni_propietario in (SELECT dni from personas where dni = '$dni')";
-    $mascotas = selectValues($bd, $sql);
+    $sql = "select nombre,especie,raza,edad,fechaNacimiento,peso from mascotas where dni_propietario in (SELECT dni from personas where dni = ?)";
+    $mascotas = selectValues($bd, $sql,$dni);
 }
 //Cerramos la conexión con la base de datos 
 $bd = null;
@@ -18,7 +17,7 @@ $bd = null;
         <h2>Estas son tus mascotas <?= $user ?></h2>
         <table border="1">
             <thead>
-                <tr>
+                <tr
                     <th class="td">Nombre</th>
                     <th class="td">Especie</th>
                     <th class="td">Raza</th>
@@ -50,7 +49,8 @@ $bd = null;
                         //generamos una consulta para las vacunas de cada mascota en la iteración del array
                         //guardo en una variable el nombre del animal en cada iteracion
                         $animal_name = $mascota['nombre'];
-                        $vacunas = selectValues($bd, "SELECT nombre_vacuna, fecha_vacunacion FROM vacunas_perro WHERE codigo_animal in (SELECT codigo_animal FROM mascotas WHERE nombre = '$animal_name')");
+                        $sql = "SELECT nombre_vacuna, fecha_vacunacion FROM vacunas_perro WHERE codigo_animal in (SELECT codigo_animal FROM mascotas WHERE nombre = ?)";
+                        $vacunas = selectValues($bd,$sql,$animal_name);
                         //Cerramos la conexión con la base de datos
                         $bd = null;
                         if (isset($vacunas)) {

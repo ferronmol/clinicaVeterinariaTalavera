@@ -16,20 +16,22 @@ if (isset($user)) {
         }
         if (isset($_POST['delete'])) { //condicional para cuando recibimos una peticion de eliminación
             $delete = htmlspecialchars($_POST['delete']);
-            managePost($delete, 'createDeleteStatement', $confirmationActive, $bd, $_POST);
+            managePost($delete, 'createDeleteStatement', $confirmationActive, $bd, $_POST,'personas');
         }
         if (isset($_POST['commit'])) { //condicional para cuando recibimos una peticion de confirmación
             $commit = htmlspecialchars($_POST['commit']);
-            managePost($commit, 'createUpdateStatement', $confirmationActive, $bd, $_POST);
+            managePost($commit, 'createUpdateStatement', $confirmationActive, $bd, $_POST,'personas');
         }
         if (isset($_POST['insert'])) { //condicional para cuando recibimos una peticion de insercción
+            var_dump($_POST);
             $insert = htmlspecialchars($_POST['insert']);
-            managePost($insert, 'createInsertStatement', $confirmationActive, $bd, $_POST);
+            //Condicional para detectar si se quiere insertar una mascotas
+            managePost($insert, 'createInsertStatement', $confirmationActive, $bd, $_POST,'');
         }
     }
     //rezlimaos la consulta para sacar por pantalla los nombres de todos los usuarios de la veterinaria
-    $sql = "select dni,nombre,apellido,telefono,direccion FROM personas WHERE rol = 0";
-    $clients = selectValues($bd, $sql);
+    $sql = "select dni,nombre,apellido,telefono,direccion FROM personas WHERE rol = ?";
+    $clients = selectValues($bd, $sql, 0);
 }
 //Cerramos la conexión con la base de datos 
 $bd = null;
@@ -91,7 +93,7 @@ $bd = null;
                         //generamos una consulta para las masscotas de cada cliente
                         //guardo en una variable el nombre del cliente sobre el que se genera la consulta
                         $client_name = $client['nombre'];
-                        $mascotas = selectValues($bd, "SELECT nombre FROM mascotas WHERE dni_propietario in (SELECT dni FROM personas WHERE nombre = '$client_name')");
+                        $mascotas = selectValues($bd, "SELECT nombre FROM mascotas WHERE dni_propietario in (SELECT dni FROM personas WHERE nombre = ?)", $client_name);
                         //Cerramos la conexión con la base de datos
                         $bd = null;
                         if (isset($mascotas)) {
@@ -145,10 +147,17 @@ $bd = null;
         <table border='1'>
             <form action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
                 <?php
-                createFormInsert($updating);
+                createFormInsert($updating,'personas');
                 ?>
             </form>
-
+        </table>
+        <h2>Inserción de una nueva msacota</h2>
+        <table border='1'>
+            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
+                <?php
+                createFormInsert($updating,'mascotas');
+                ?>
+            </form>
         </table>
         <?php
     }//Cierre del else principal que nos carga la pagina cuanso no hay formulario de confirmacion

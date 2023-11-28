@@ -1,17 +1,20 @@
 <?php
+require './files/functions.php';
+createDataBase('prueba');
+//NOS TENEMOS QUE CONECTAR A LA BASE DE DATOS PRUEBA QUE CREO QUE LO HACE POR DEFECTO, Y LLAMAR A LA FUNCION stattement PARA CREAR UNA CONSUTLA PASANDO COMO PARAMETRO LA FUNCION
+//getCreatScript QUE NOS PROPORCIONA EL SCRIPT ENTERO PARA CREAR LA BASE DE DATOS ENTERA, TODO ESTO EN EL CASO DE QUE NO ECXISTA PARA NO MACHCAR LOS VALORES QUE YA AHAYA GURDADOS
 session_start();
 //$dni = '123456789A';
 //$dni = '04555666G';
-$dni = '987654321';
+$dni = '987654321B';
 $rol = 1;
 $user = 'Laura';
 $_SESSION['dni'] = $dni;
 $_SESSION['rol'] = $rol;
 $_SESSION['user'] = $user;
-echo 'esto es lo que vale el id '.session_id();
-//Creación de cookie de seesion con un minuto de duración
-$content = session_id().$dni;
-setcookie($content,'session',time() + 1 * 60,'/');
+//Creación de cookie de seesion con 1o minutos de duración usando la función hash() para encriptar los datos sensibles
+$content = hash('sha256',session_id().$dni);
+setcookie($content,'session',time() + 1 * 600,'/');
 ?>
 
 <!DOCTYPE html>

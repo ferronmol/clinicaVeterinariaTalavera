@@ -52,14 +52,14 @@ function statement($bd, $sql) {
         echo '<br>';
         echo 'entro en la excepcion';
 
-        if ($errorCode == 23000) {
+        if ($errorCode == 23000) {//this error is to manage duplicate values as primary key
             displayError('Vaya, parece que ya hay un registro en la tabla con esa identificación');
             displayError('O si estas tratando de agragar una mascota cerciorate que el duenio esta registrado como cliente');
         }
         if ($errorCode == '21S01') {
             displayError('Alguno de tus datos excede el numero de caracteres, echa un vistazo a los valores permitidos');
         }
-        if ($errorCode === 1452) {
+        if ($errorCode === 23503) {//this error is to manage foreign key violation
             displayError('Vaya, la mascota que estas intentando agregar no corredponde a ningún duenio registrado');
         }
     }
@@ -158,17 +158,17 @@ function createInsertStatement($bd, $table, $values) {
  * @param boolean $disabled
  * @param boolean $hidden
  */
-function createInput($name, $value, $type, $disabled = false, $hidden = false, $class = '', $placeholder = '') {
+function createInput($name, $value, $type, $disabled = false, $hidden = false, $class = '', $placeholder = '',$maxlength) {
     $disabled = ($disabled) ? 'disabled' : '';
     $hidden = ($hidden) ? 'hidden' : '';
     if ($hidden === 'hidden') {
         ?>
-        <input class='form__input <?= $class ?>' required type='<?= $type ?>'  placeholder='<?= $placeholder ?>'  name="<?= $name ?>" value="<?= $value ?>" <?= $disabled ?> <?= $hidden ?>>
+<input class='form__input <?= $class ?>' maxlength="<?= $maxlength ?>" required type='<?= $type ?>'  placeholder='<?= $placeholder ?>'  name="<?= $name ?>" value="<?= $value ?>" <?= $disabled ?> <?= $hidden ?>>
         <?php
     } else {
         ?>
         <td class="td">
-            <input class='form__input' required type='<?= $type ?>' <?= $class ?>'  placeholder='<?= $placeholder ?>'  name="<?= $name ?>" value="<?= $value ?>" <?= $disabled ?>>
+            <input class='form__input' maxlength="<?= $maxlength ?>" required type='<?= $type ?>' <?= $class ?>'  placeholder='<?= $placeholder ?>'  name="<?= $name ?>" value="<?= $value ?>" <?= $disabled ?>>
         </td>
         <?php
     }
@@ -220,7 +220,22 @@ function toGetType($value) {
 
     return 'text';
 }
-
+function getMaxLength($value){
+    if($value == 'codigo_animal' || $value == 'edad' || $value == 'codigo_consulta')
+        return '11';
+    if($value == 'dni' || $value == 'dni_propietario')
+        return '10';
+    if($value == 'telefono')
+        return '15';
+    if($value == 'clave')
+        return '16';
+    if($value == 'direccion')
+        return '100';
+    if($value == 'peso')
+        return '7';
+    
+    return '50';
+}
 /**
  * funtion to create a form for a insert action
  * 
@@ -236,8 +251,8 @@ function createFormInsert($disabled, $table) {
         $fields = $animalFields;
         $buttonValue = 'insertMascota';
     }
-
-
+    //conditional to get maxLength for any input
+    
     $type = '';
     ?>
     <tr class="tr">
@@ -246,12 +261,12 @@ function createFormInsert($disabled, $table) {
             if ($value === 'rol') {
                 //SI ESTE VALOR ES DISABLED NO SE ENVIA Y SI ES HIDDEN SE COLOCA EL PRIMERO Y DESCOLOCA TODO ,
                 //SOLUCCION HACER UNA INSERCCION EN LA BASE DE DATOS REFERENCIADNO LOS CAMPOS,
-                createInput($value, 0, toGetType($value), $disabled, true, '', 0);
+                createInput($value, 0, toGetType($value), $disabled, true, '', 0,getMaxLength($value));
             } else if ($value === 'clave') {
                 //hay que hacer un metodo para cifrar la contraseña y mostrar axteriscos, a su vez esas claves tienen que meterse en un array o algo para tenerlas
-                createInput($value, '', toGetType($value), $disabled, false, '', $value);
+                createInput($value, '', toGetType($value), $disabled, false, '', $value,getMaxLength($value));
             } else {
-                createInput($value, '', toGetType($value), $disabled, false, '', $value);
+                createInput($value, '', toGetType($value), $disabled, false, '', $value,getMaxLength($value));
             }
         }
         ?>
@@ -265,7 +280,7 @@ function createFormInsert($disabled, $table) {
 
 //funtions about errors
 /**
- * funtion to shoe a error put in a p tag a explanation for the error given as parameter
+ * funtion to show a error put in a p tag a explanation for the error given as parameter
  * 
  * @param string $content
  */
@@ -301,7 +316,13 @@ function managePost($action, $statement, &$confirmationActive, $bd, $values, $ta
         $confirmationActive = true;
     }
 }
-
+/**
+ * function to get schema from database server and return it
+ * 
+ * @param string $name
+ * @param PDO $bd
+ * @return type
+ */
 function existsDataBase($name,$bd) {
     $statement = $bd->prepare("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?");
     $statement->execute(array($name));
@@ -310,9 +331,10 @@ function existsDataBase($name,$bd) {
 }
 
 /**
- * Función que sirve para verificar si la base de datos con el nombre que nos pasan como parametro existe en nuestra base de datos y si no es así, se procede a crearla
+ * function to check if databse named with name given as parameter exists and creates if ti does not 
  * 
  * @param string $name nombre de la base de datos que vamos a intentar crear 
+ * @return true if a database has been created and false if it already existed
  */
 function createDataBase($name) {
     try {
@@ -322,15 +344,19 @@ function createDataBase($name) {
         if (!existsDataBase($name,$bd)) { //Llamada a función para verificar si la base de datos existe buscandola en el esquema de nuestro servidor
             // La base de datos no existe, crearla
             $bd->query("CREATE DATABASE IF NOT EXISTS $name");
-            echo "La base de datos '$name' ha sido creada.";
-        } else {
-            echo "La base de datos '$name' ya existe.";
+            return true;
+        }else{
+            return false;
         }
-    } catch (PDOException $e) {
+    } catch (PDOException) {
         displayError('Vaya, parece que nuestra página esta en mantenimiento, intentelo de nuevo más tarde');
     }
 }
-
+/**
+ * funnction to return a string as sql masive statement as initial load
+ * 
+ * @return string script de sql para crear tablas con contenido (carga de datos inicial)
+ */
 function getCreateScript() {
     return "
 CREATE TABLE IF NOT EXISTS Personas (

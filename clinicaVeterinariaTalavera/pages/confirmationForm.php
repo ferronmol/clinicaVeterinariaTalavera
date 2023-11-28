@@ -17,7 +17,7 @@ if(isset($insert)){
 
 <form action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
     <?php
-    createInput('array', $serializesValues, 'hidden', false, true, '', '');
+    createInput('array', $serializesValues, 'hidden', false, true, '', '',0);
     createButton($action, 'yes', 'Si');
     createButton($action, 'no', 'No');
     ?>

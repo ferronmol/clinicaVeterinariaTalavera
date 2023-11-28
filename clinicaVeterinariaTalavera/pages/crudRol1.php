@@ -77,15 +77,16 @@ $bd = null;
                                         //le damos a la varibale matches el valor true para mas abajo generar un input confirmas cambios en lugar de modificar
                                         $matches = true;
                                         //Llamamos a una funcion para generar un elemento pasandole valores para name,value y disabled
-                                        createInput($key, $value, toGetType($value));
+                                        createInput($key, $value, toGetType($value),false,false,'','',getMaxLength($value));
                                     } else {
                                         //este condicional nos va a controlar que los input se generen disabled para no poder modificarlo y lo creamos llamando ala funcion para crear el elemento
-                                        createInput($key, $value, toGetType($value), true);
+                                        createInput($key, $value, toGetType($value), true,false,'','',getMaxLength($value));
                                     }
                                 } else {
                                     //este condicional nos va a controlar que los input se generen disabled para no poder modificarlo
-                                    createInput('name_cliente', $value, toGetType($value), true);
+                                    createInput('name_cliente', $value, toGetType($value), true,false,'','',getMaxLength($value));
                                 }
+//                                function createInput($name, $value, $type, $disabled = false, $hidden = false, $class = '', $placeholder = '',$maxlength)
                             }
                         }
                         //Realizamos una conexión a la base de datos para obtener el objeto con el que realizaremos la consulta
@@ -119,7 +120,7 @@ $bd = null;
 
                                 if ($matches) {
                                     //Llamamos a la funcion para generar un input mandandole parametros especificos
-                                    createInput('dni', $client['dni'], 'text', true, true, 'hidden');
+                                    createInput('dni', $client['dni'], 'text', true, true, 'hidden','','',getMaxLength($value));
                                     //Llamamos a la funcion para generar un boton de confirmar
                                     createButton('commit', $client['dni'], 'Confirmar', 'bg-success');
                                 } else {

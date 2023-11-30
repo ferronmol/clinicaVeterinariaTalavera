@@ -22,7 +22,7 @@ if (isset($_POST['reg_user'])) {
 
     if ($password_1 != $password_2) {
         array_push($errors, "Las contraseñas no coinciden");
-        $_SESSION['error'] = "Las contraseñas no coinciden";
+        $_SESSION['error'] = "Las contraseñs no coinciden";
     }
 
     $user_check_query = "SELECT * FROM personas WHERE dni = '$dni' OR email = '$email' LIMIT 1";
@@ -59,7 +59,7 @@ if (isset($_POST['reg_user'])) {
             if ($stmt->execute()) {
                 $_SESSION['dni'] = $dni;
                 $_SESSION['success'] = "Registrado correctamente.Ahora estás logueado como $dni.";
-                header('location: ../index.php');
+                header('location: index.php');
                 exit();
             } else {
                 array_push($errors, "Error al insertar en la base de datos");

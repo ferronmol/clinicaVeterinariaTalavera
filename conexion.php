@@ -7,8 +7,11 @@ if (!function_exists('connectionBBDD')) {
             $bd = new PDO($cadena, $user, $password);
             return $bd;
         } catch (Exception $ex) {
-            die('La conexión no se pudo realizar correctamente, intentalo más tarde');
+            echo 'La conexión no se pudo realizar correctamente, intentalo más tarde';
+            
+                
         }
     }
 }
 $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
+

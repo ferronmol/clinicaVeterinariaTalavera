@@ -1,55 +1,49 @@
 <?php
 session_start();
-
-$errors = array();
-
 include('conexion.php');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-if (isset($_POST['login_user'])) {
-    //verificar la conexion
-
-    $username = $_POST['username'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $dni = strtoupper($_POST['dni']);
     $password = $_POST['password'];
 
-    if (empty($username) || empty($password)) {
-        array_push($errors, "Todos los campos son requeridos");
-        $_SESSION['error'] = "Todos los campos son requeridos";
-    }
+    try {
+        // Consulta preparada para obtener la contraseña almacenada
+        $stmt = $bd->prepare("SELECT dni, clave FROM personas WHERE dni = :dni");
+        $stmt->bindParam(':dni', $dni);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (count($errors) == 0) {
-        $clave = hash('sha256', $password);
+        if (!$result) {
+            // El DNI no existe en la base de datos
+            $_SESSION['error'] = "DNI  incorrectos";
+            header("location: login.php");
+            exit();
+        }
+        if ($result) {
+            // Verificar la contraseña
+           
+            $hashedPassword = hash('sha256', $password);
+            echo "Contraseña ingresada: " . $password . "<br>";
+            echo "Contraseña cifrada en la base de datos: " . $result['clave'] . "<br>";
+            echo "Contraseña cifrada para comparación: " . $hashedPassword . "<br>";
 
-        // Uso de consulta preparada
-        $stmt = $bd->prepare("SELECT * FROM personas WHERE Nombre=:username AND Clave=:clave");
-
-        // Asignar valores a los parámetros de la consulta
-        $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':clave', $clave);
-
-        if ($stmt->execute()) {
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($result) {
+            if (hash('sha256', $password) === $result['clave']) {
                 $_SESSION['dni'] = $result['dni'];
                 $_SESSION['success'] = "Sesión iniciada correctamente";
                 header('location: index.php');
                 exit();
             } else {
-                array_push($errors, "Nombre de usuario o contraseña incorrectos");
-                $_SESSION['error'] = "Nombre de usuario o contraseña incorrectos";
-                echo "Mensaje de error establecido";
-                header("location: login.php");
-                exit();
+                $_SESSION['error'] = " contraseña incorrectos.";
             }
-        } else {
-            array_push($errors, "Error al ejecutar la consulta");
-            $_SESSION['error'] = "Error al ejecutar la consulta";
-            header("location: login.php");
         }
-    } else {
-        header("location: login.php");
-        exit();
+    } catch (PDOException $e) {
+        $_SESSION['error'] = "Error en la conexión a la base de datos: " . $e->getMessage();
     }
+
+    header("location: login.php");
+    exit();
 }
 ?>
 
@@ -59,46 +53,44 @@ if (isset($_POST['login_user'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagina de Inicio de sesión</title>
-
+    <title>Página de Inicio de sesión</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
-
     <div class="header">
         <h2>Iniciar sesión</h2>
     </div>
 
-    <form class="form" action="login_db.php" method="post">           
-                <?php
-                // Verificar si hay errores antes de mostrar el div
-                if (isset($_SESSION['error'])): 
-                ?>
-                <div class="error">
-                    <h3>
-                        <?php 
-                            echo $_SESSION['error'];
-                            unset($_SESSION['error']);
-                        ?>
-                    </h3>
-                </div>
-                <?php endif; ?>
+    <form class="form" action="login.php" method="post">
+        <?php
+        if (isset($_SESSION['error'])) :
+        ?>
+            <div class="error">
+                <h3><?php echo $_SESSION['error']; ?></h3>
+            </div>
+        <?php
+            unset($_SESSION['error']);
+        endif;
+        ?>
+
         <div class="input-group">
             <label for="dni">DNI usuario</label>
-            <input type="text" name="dni">
+            <input type="text" name="dni" required>
         </div>
+
         <div class="input-group">
             <label for="password">Contraseña</label>
-            <input type="password" name="password">
+            <input type="password" name="password" required>
         </div>
-        <div class="input-group">
-            <button type="submit" name="login_user" class="btn">Iniciar sesión</button>
 
+        <div class="input-group">
+            <button type="submit" class="btn">Iniciar sesión</button>
         </div>
+
         <p>Si no estás registrado <a href="register.php">Regístrate</a></p>
         <a href="index.php">Volver a la página principal</a>
-    </form>   
+    </form>
 </body>
 
 </html>

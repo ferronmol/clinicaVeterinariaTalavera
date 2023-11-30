@@ -1,21 +1,19 @@
 <?php
 require './files/functions.php';
-//Lamada a función para crear la base de datos sino existe, usamos dentro de un condicional porque nos devolvra true si la base de datos no existe y a sido creada
+//Llamada a función para crear la base de datos sino existe, usamos dentro de un condicional porque nos devolvra true si la base de datos no existe y a sido creada
 //para generar las tablas con los datos para tener una carga inicial
-if(createDataBase('prueba')){
+if(createDataBase('exposicion')){
     try{
         //nos conectamos a la base de detos creada
-    $bd = connectionBBDD('mysql:dbname=prueba;host=127.0.0.1', 'root', '');
+    $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
     //Vamos a generar una consulta masiva con el metodo que nos devuleve dicho script sql ya creado y hacemos una consulta con ello
     $bd->query(getCreateScript());
+    $bd = null;
     } catch (Exception $ex) {
         displayError('Vaya, parece que estamos en labores de mantenimiento, intentelo de nuevo más tarde');
     }
     
 }
-//Llamada a función para generar las tablas con los datos
-//NOS TENEMOS QUE CONECTAR A LA BASE DE DATOS PRUEBA QUE CREO QUE LO HACE POR DEFECTO, Y LLAMAR A LA FUNCION stattement PARA CREAR UNA CONSUTLA PASANDO COMO PARAMETRO LA FUNCION
-//getCreatScript QUE NOS PROPORCIONA EL SCRIPT ENTERO PARA CREAR LA BASE DE DATOS ENTERA, TODO ESTO EN EL CASO DE QUE NO ECXISTA PARA NO MACHCAR LOS VALORES QUE YA AHAYA GURDADOS
 session_start();
 //$dni = '123456789A';
 //$dni = '04555666G';

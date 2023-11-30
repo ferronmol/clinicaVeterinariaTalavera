@@ -4,7 +4,7 @@ $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
 if (isset($dni)) {
     //rezlimaos la consulta para sacar por pantalla los nombres de las mascotas del usuario para qeu pueda eleir una de ellas
     $sql = "select nombre,especie,raza,edad,fechaNacimiento,peso from mascotas where dni in (SELECT dni from personas where dni = ?)";
-    $mascotas = selectValues($bd, $sql,$dni);
+    $mascotas = selectValues($bd, $sql,array($dni));
 }
 //Cerramos la conexión con la base de datos 
 $bd = null;
@@ -55,7 +55,7 @@ $bd = null;
                         //guardo en una variable el nombre del animal en cada iteracion
                         $animal_name = $mascota['nombre'];
                         $sql = "SELECT nombre_vacuna, fecha_vacunacion FROM vacunas_perro WHERE codigo_animal in (SELECT codigo_animal FROM mascotas WHERE nombre = ?)";
-                        $vacunas = selectValues($bd,$sql,$animal_name);
+                        $vacunas = selectValues($bd,$sql,array($animal_name));
                         //Cerramos la conexión con la base de datos
                         $bd = null;
                         if (isset($vacunas)) {
@@ -72,8 +72,10 @@ $bd = null;
                             </td>
                             <?php
                         }
+                        if($rol == 1){
+                            require '../files/buttons.php';
+                        }
                         
-                        require '../files/buttons.php';
                         
                         ?>
                     </tr>
@@ -85,7 +87,13 @@ $bd = null;
                 ?>
             </tbody>
         </table>
+        <!--button to go back to users if user is allowed by his rol-->
         <?php
+        if($rol == 1){
+            ?>
+        <a class="btn bg-primary" href="./crud.php">Volver a los usuarios</a>
+        <?php
+        }
     ?>
 
 </main>

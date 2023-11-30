@@ -15,6 +15,7 @@ function connectionBBDD($cadena, $user = 0, $password = 0) {
         return $bd;
     } catch (Exception $ex) {
         displayError('La apicación esta en labores de mantenimiento');
+        exit;
     }
 }
 
@@ -25,10 +26,10 @@ function connectionBBDD($cadena, $user = 0, $password = 0) {
  * @param string $sql
  * @return type PDO
  */
-function selectValues($bd, $sql, $value) {
+function selectValues($bd, $sql, $array) {
     try {
         $values = $bd->prepare($sql);
-        $values->execute(array($value));
+        $values->execute($array);
 //realizamos ese código apra solo coger el array asociativo de la consulta
         $values->setFetchMode(PDO::FETCH_ASSOC);
         return $values;
@@ -45,7 +46,7 @@ function selectValues($bd, $sql, $value) {
  */
 function statement($bd, $sql) {
     try {
-        $bd->query($sql);
+        return $bd->query($sql);
     } catch (Exception $ex) {
         $errorCode = $ex->getCode();
 
@@ -169,6 +170,23 @@ function createInsertStatement($bd, $table, $values) {
     } catch (Exception $exc) {
         displayError('Los datos de la insercción no son corerctos, revisa que los campos cumplan con los requisitos especificados');
     }
+}
+/**
+ * function to return if refernce table is mascotas or personas
+ * 
+ * @param array $values values form $_POST
+ * @param number $rol rol from a user
+ * @return bool
+ */
+function getRefenceTable($values,$rol){
+    if(isset($values['mascotas']))
+        return true;
+    if(isset($values['users']))
+        return false;
+    if($rol == 1)
+        return false;
+    if($rol == 0)
+        return true;
 }
 
 //funtions about create element****************************************************************************************************************************************
@@ -333,7 +351,19 @@ function displayError($content) {
     <?php
 }
 
-//functions about cookies
+//functions about cookies********************************************************************************************************************
+
+
+/**
+ * Function to create a seesion cookie based in seesion_id and dni given as parameter a return name of newly created cookie
+ * 
+ * @param string $sessionID
+ * @param string $dni
+ * @return string cookie name
+ */
+function nameSessionCookie($sessionID, $dni) {
+    return hash('sha256', $sessionID . $dni);
+}
 
 /** function to callign other funtion to manage teh type of action user wants to complete
  * 
@@ -426,7 +456,7 @@ function createDataBase($name) {
  * 
  * @return string script de sql para crear tablas con contenido (carga de datos inicial)
  */
-function getCreateScript() {
+function getScript() {
     return "
 CREATE TABLE IF NOT EXISTS Personas (
     DNI VARCHAR(10) PRIMARY KEY,
@@ -473,8 +503,8 @@ CREATE TABLE IF NOT EXISTS Vacunas_Perro (
 
 -- Generar 7 registros con Rol 0
 INSERT INTO Personas (DNI, Nombre, Apellido, FechaNacimiento, Email, Telefono, Direccion, Rol, Clave)
-VALUES
-  ('123456789A', 'Juan', 'Pérez', '1985-03-15', 'juan.perez@email.com', '123-456-7890', 'Calle A, Ciudad A', 0,'5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'),
+VALUES                                                                                                         
+  ('123456789A', 'Juan', 'Pérez', '1985-03-15', 'juan.perez@email.com', '123-456-7890', 'Calle A, Ciudad A', 0,'9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0'),
   ('987654321B', 'Ana', 'López', '1990-05-20', 'ana.lopez@email.com', '987-654-3210', 'Calle B, Ciudad B', 0,'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c'),
   ('567890123C', 'María', 'García', '1980-12-10', 'maria.garcia@email.com', '567-890-1230', 'Calle C, Ciudad C', 0,'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9'),
   ('345678901D', 'David', 'Martínez', '1988-08-25', 'david.martinez@email.com', '345-678-9010', 'Calle D, Ciudad D', 0,'318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69'),
@@ -485,9 +515,9 @@ VALUES
 -- Generar 3 registros con Rol 1
 INSERT INTO Personas (DNI, Nombre, Apellido, FechaNacimiento, Email, Telefono, Direccion, Rol,Clave)
 VALUES
-  ('654321098H', 'Roberto', 'Hernández', '1983-01-05', 'roberto.hernandez@email.com', '654-321-0980', 'Calle H, Ciudad H', 1,'6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b'),
-  ('890123456I', 'Isabel', 'Gómez', '1995-06-20', 'isabel.gomez@email.com', '890-123-4560', 'Calle I, Ciudad I', 1,'d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35'),
-  ('234567890J', 'Luis', 'Rodríguez', '1982-11-15', 'luis.rodriguez@email.com', '234-567-8900', 'Calle J, Ciudad J', 1,'4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce');
+  ('654321098H', 'Roberto', 'Hernández', '1983-01-05', 'roberto.hernandez@email.com', '654-321-0980', 'Calle H, Ciudad H', 1,'fe91a760983d401d9b679fb092b689488d1f46d92f3af5e9e93363326f3e8aa4'),
+  ('890123456I', 'Isabel', 'Gómez', '1995-06-20', 'isabel.gomez@email.com', '890-123-4560', 'Calle I, Ciudad I', 1,'b7e307660e1611cb42bcb28e4bb4a6465ccb5ec2e028ca4be8b84e8787929a38'),
+  ('234567890J', 'Luis', 'Rodríguez', '1982-11-15', 'luis.rodriguez@email.com', '234-567-8900', 'Calle J, Ciudad J', 1,'793a84a351bd364d2f0323b67b39407711e54bc4748c439fb32734538ef8dd15');
 
 
 -- Generar 30 registros aleatorios de animales con propietarios con Rol 0

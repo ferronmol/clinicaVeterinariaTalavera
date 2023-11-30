@@ -1,0 +1,384 @@
+:root {
+    --mi-gradiant: linear-gradient(
+        150deg,
+        rgba(69, 152, 224, 1) 0%,
+        rgba(66, 179, 205, 1) 31%,
+        rgba(63, 212, 182, 1) 70%
+      );
+}
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  width: 100%;
+  background-color: cadetblue;
+
+}
+.img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.service {
+  margin: 0 auto;
+  width: 100%;
+  margin-top: 80px;
+}
+.consulta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.consulta__title {
+  margin: 1rem auto;
+  text-align: center;
+}
+.consulta__subtitle {
+  text-align: center;
+  margin: 0 auto;
+}
+/****BTN CONSULTA****/
+.btn-consulta {
+  border: 0;
+  background-image: var(--mi-gradiant); 
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  font-size: 18px;
+  padding: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin: 2rem auto;
+}
+.btn-consulta span {
+  background-color: #111;
+  padding: 16px 24px;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+.btn-consulta:hover span {
+  background: none;
+}
+.btn-consulta:active {
+  transform: scale(0.9);
+}
+.consulta-form.visible {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.consulta-form {
+  display: none;
+  justify-content: center;
+}
+.form-input {
+  width: 300px;
+  height: 30px;
+  margin: 0.5rem auto;
+}
+.form-textarea {
+  width: 300px;
+  height: 60px;
+  margin: 0.5rem auto;
+}
+.label {
+  display: block;
+  text-align: center;
+  margin-bottom: 0.2rem;
+}
+/*****CLINICA ****/
+.clinica{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+}
+.text-xl{
+  display: none;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: bold;
+}
+
+.clinica__text-container {
+  display: flex;
+  justify-content: center;
+  max-width: 90%;
+  margin: 0 auto;
+}
+.clinica__text {
+  display: none;
+  width: 100%;
+  height: auto;
+  margin: 0.2rem auto;
+  text-align: justify;
+  padding: .6rem;
+} 
+.clinica__img {
+  height: 300px;
+  border-radius: 5px;
+}
+
+.clinica__title {
+ text-align: center;
+  color: white;
+  font-size: 2.5rem;
+}
+/*****MASCOTAS ****/
+.mascotas {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.mascotas__title {
+  font-size: 2.5rem;
+  width: 100%;
+  text-align: center;
+  color: white;
+}
+
+.mascotas-imagenes {
+  width: 90%;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.mascotas-img-container {
+  position: relative;
+  border: none;
+  width: auto;
+  max-width: 500px;
+  transition: 0.9s;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 5px;
+}
+.mascotas-img-container:hover .mascotas-img{
+  transform: scale(1.1);
+}
+.mascotas-img-container:hover .content_text{
+ 
+  display: block;
+}
+.mascotas-img {
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  height: auto;
+  flex: auto;
+  border-radius: 5px;
+}
+.content{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.5 );
+  display: none;
+  transition: 0.3s;
+}
+.content_text{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 2rem;
+  font-weight: bold;
+  display: none;
+}
+.content_text--white{
+  color: white;
+}
+.content_text--black{
+  color: black;
+}
+.mascotas-img-container:hover .content{
+  display: flex;
+}
+/****SERVICIOS****/
+.servicios {
+  width: 90%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 3rem;
+}
+.servicios__list{
+ height:auto;
+}
+.servicios__title {
+  color: white;
+  font-size: 2rem;
+}
+.text-icon{
+  display: inline-block;
+  margin: .5rem;
+}
+.space{
+  margin: 1rem;
+}
+/*****CARDS******/
+.team-title{
+  color: white;
+  font-size: 2.5rem;
+  width: 100%;
+  text-align: center;
+  margin-bottom: .5rem;
+}
+.team-container {
+  display:none;
+  justify-content: center;
+  align-items: stretch;
+  padding: 20px;
+  margin: 1rem auto;
+}
+
+.team-member {
+  width: 100%;
+  max-width: 250px;
+  margin: 10px;
+  perspective: 1000px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 1s;
+  transform: translateZ(0); /* Para evitar el bug de la animación en Chrome */
+}
+.card:hover {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+.card-front {
+  transform: rotateY(0deg);
+}
+
+.card-back{
+  transform: rotateY(180deg);
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px 10px 0 0;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  border: 2px solid #fff;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.member-name {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 0;
+}
+
+.member-role {
+  font-weight: bold;
+  color: #555;
+}
+
+.member-info {
+  margin: 10px 0 0;
+}
+.face.back {
+  transform: rotateY(180deg); /* Inicialmente, la cara trasera está girada 180 grados */
+}
+
+.face.back .card-body {
+  transform: rotateY(-180deg); /* Para contrarrestar la rotación de la cara trasera */
+}
+
+.card-body {
+  backface-visibility: hidden; /* Ocultar la cara trasera cuando no esté visible */
+  transform-style: preserve-3d; /* Mantener la perspectiva para la rotación */
+  transition: transform 1s; /* Transición para la animación de rotación */
+  transform: translateZ(0); /* Para evitar el bug de la animación en Chrome */
+}
+.flip-card:hover .card-body {
+  transform: rotateY(0deg); /* Rotar de nuevo a 0 grados al hacer hover */
+}
+
+/**FOTOS ANIMADAS***/
+.img_container{
+  position: relative;
+  margin: 2rem;
+  padding: .5rem;
+  box-shadow: (0,0,0,0.5);
+
+  border-radius: 5px;
+  display: flex;
+  justify-content:flex-end;
+}
+@keyframes vamos{
+  0%{
+transform-origin: center left;
+    transform: scale(.8);
+  }
+  100%{
+    transform-origin: center right;
+    transform: scale(2);
+  }
+}
+.img_s {
+  border-radius: 5px;
+  height: 120px;
+  width: 120px;
+  object-fit: cover;
+  padding: 1rem;
+}
+/******GALERIA EFECTOS******/
+.efecto_img{
+  margin: 0 auto;
+  display: flex;
+  width: 90%;
+  height: 250px;
+  margin-bottom: 2rem;
+}
+.img_fresh{
+  width: 0px;
+  flex-grow: 1;
+  object-fit: cover;
+  opacity: 0.8;
+  animation: 0.5s;
+}
+.img_fresh:hover{
+  opacity: 1;
+  cursor: pointer;
+  width: 100px;
+}
+.text {
+  text-align: justify;
+  margin:.5rem;
+}
+
+

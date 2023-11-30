@@ -41,7 +41,7 @@
                             //generamos una consulta para las masscotas de cada cliente
                             //guardo en una variable el nombre del cliente sobre el que se genera la consulta
                             $condition = $client['nombre'];
-                            $options = selectValues($bd, "SELECT nombre FROM mascotas WHERE dni in (SELECT dni FROM personas WHERE nombre = ?)", $condition);
+                            $options = selectValues($bd, "SELECT nombre FROM mascotas WHERE dni in (SELECT dni FROM personas WHERE nombre = ?)", array($condition));
                         //Cerramos la conexión con la base de datos
                         $bd = null;
                         if (isset($options)) {

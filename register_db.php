@@ -5,6 +5,11 @@ $errors = array();
 
 if (isset($_POST['reg_user'])) {
     $dni = strtoupper($_POST['dni']);
+    // Validacion del formato del DNI
+    if (!preg_match('/^[0-9]{8}[a-zA-Z]$/', $dni)) {
+        array_push($errors, "El DNI debe tener 8 números y una letra");
+        $_SESSION['error'] = "El DNI debe tener 8 números y una letra";
+    }
     $username = ucwords(strtolower($_POST['username']));
     $usersubname = ucwords(strtolower($_POST['usersubname']));
     $fnacimiento = $_POST['fnacimiento'];

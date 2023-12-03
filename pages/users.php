@@ -1,6 +1,6 @@
 
 <main class="main">
-    <?php?>
+    <?php ?>
         <h2>Usuarios de la Clínica</h2>
         <table border="1">
             <thead>

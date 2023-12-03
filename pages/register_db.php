@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('conexion.php');
+include ('../files/conexion.php');
 $errors = array();
 
 if (isset($_POST['reg_user'])) {

@@ -15,7 +15,7 @@ $bd = null;
         <h2>Estas son las mascotas de <?= $user ?></h2>
         <table border="1">
             <thead>
-                <tr
+                <tr>
                     <th class="td">Nombre</th>
                     <th class="td">Especie</th>
                     <th class="td">Raza</th>

@@ -1,3 +1,0 @@
-[build]
-  command = "php index.php"
-  publish = "./"

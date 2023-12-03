@@ -26,15 +26,25 @@ function connectionBBDD($cadena, $user = 0, $password = 0) {
  * @param string $sql
  * @return type PDO
  */
-function selectValues($bd, $sql, $array) {
+function getSelectStatementValues($bd, $sql, $array) {
     try {
         $values = $bd->prepare($sql);
         $values->execute($array);
 //realizamos ese código apra solo coger el array asociativo de la consulta
-        $values->setFetchMode(PDO::FETCH_ASSOC);
-        return $values;
+         // Verifica si hay al menos una fila de resultados
+         if ($values->rowCount() > 0) {
+            // Realizamos ese código para solo coger el array asociativo de la consulta
+            $values->setFetchMode(PDO::FETCH_ASSOC);
+            return $values;
+        } else {
+            // No hay resultados, puedes manejar esta situación según tus necesidades
+            return false;
+        }
     } catch (Exception $exc) {
-        displayError('La aplicación esta en labores de mantenimiento');
+        displayError('La aplicación está en labores de mantenimiento');
+        // Puedes agregar más detalles si es necesario
+        echo '<p class="error">Detalles: ' . $exc->getMessage() . '</p>';
+        // Puedes registrar el error en un archivo de registro o en otro sistema de seguimiento de errores si es necesario
     }
 }
 
@@ -62,6 +72,7 @@ function statement($bd, $sql) {
         }
     }
 }
+
 /**
  * function to return keyword based in array key matches from values
  * 
@@ -92,7 +103,7 @@ function createUpdateStatement($bd, $table, $values) {
         //guardamos el dni para luego usarlo como condicion del where
         $condition = htmlspecialchars($values['commit']);
 //guardamos en un array nuevo solo los valores que vamos a necesitar
-        $newValues = array_slice($values, 1, 4);
+        $newValues = array_slice($values, 2, 4);
 //inicializamos la varible sql para ir generando la consulta acumulando los string
         $sql = "UPDATE $table SET ";
         foreach ($newValues as $key => $value) {
@@ -171,6 +182,7 @@ function createInsertStatement($bd, $table, $values) {
         displayError('Los datos de la insercción no son corerctos, revisa que los campos cumplan con los requisitos especificados');
     }
 }
+
 /**
  * function to return if refernce table is mascotas or personas
  * 
@@ -178,16 +190,37 @@ function createInsertStatement($bd, $table, $values) {
  * @param number $rol rol from a user
  * @return bool
  */
-function getRefenceTable($values,$rol){
-    if(isset($values['mascotas']))
-        return true;
-    if(isset($values['users']))
-        return false;
-    if($rol == 1)
-        return false;
-    if($rol == 0)
-        return true;
+function getReferenceTable($values, $rol) {
+    if (isset($values['mascotas']))
+        return 'mascotas';
+    if (isset($values['users']))
+        return 'personas';
+    if ($rol == 1)
+        return 'personas';
+    if ($rol == 0)
+        return 'mascotas';
 }
+
+function getOptionsValues($keyword, $sql) {
+    $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
+    $options = getSelectStatementValues($bd, $sql, array($keyword));
+    //Cerramos la conexión con la base de datos
+    $bd = null;
+    return $options;
+}
+
+function getAction($values){
+    if(isset($values['delete'])){
+        return [$values['delete'],'createDeleteStatement'];
+    }
+    if(isset($values['insert'])){
+        return [$values['insert'],'createInsertStatement'];
+    }
+    if(isset($values['commit'])){
+        return [$values['commit'],'createUpdateStatement'];
+    }
+}
+
 
 //funtions about create element****************************************************************************************************************************************
 /**
@@ -224,10 +257,10 @@ function createVaccines($vaccines) {
             foreach ($vacuna as $key => $value) {
                 ?>
                 <?= $value . ' ' ?>
-                <?php
-            }
-            //Cerramos la etiqueta option
-            ?>
+            <?php
+        }
+        //Cerramos la etiqueta option
+        ?>
         </option>
         <?php
     }
@@ -332,9 +365,9 @@ function createFormInsert($disabled, $table) {
         }
         ?>
         <td class="td">
-            <?php
-            createButton('insert', $buttonValue, 'Insertar', 'bg-primary', $disabled);
-            ?>
+    <?php
+    createButton('insert', $buttonValue, 'Insertar', 'bg-primary', $disabled);
+    ?>
     </tr>
     <?php
 }
@@ -352,7 +385,6 @@ function displayError($content) {
 }
 
 //functions about cookies********************************************************************************************************************
-
 
 /**
  * Function to create a seesion cookie based in seesion_id and dni given as parameter a return name of newly created cookie
@@ -373,15 +405,15 @@ function nameSessionCookie($sessionID, $dni) {
  * @param PDO $bd database object
  * @param Array $values  $_POST global variable
  */
-function managePost($action, $statement, &$confirmationActive, $bd, $values, $table) {
+function managePost($action, $statement, &$confirmationActive, $bd, &$values, $table) {
     //Llamamos a una funcion para borrar los datos
 
     if ($action === 'yes') {//condicional para saber si el usuario confirma la modificación de los datos
         //Deserialización del array que nos llega desde el formualrio de confirmación
-        $clearValues = unserialize(base64_decode($values['array']));
+        $values = unserialize(base64_decode($values['array']));
         //Llamamos a la función para crear una consulta de delete y lo que nos devulve esa función se lo pasamos
         //como parametro a ala función padre apra generar la consulta a la base de datos
-        statement($bd, $statement($bd, $table, $clearValues));
+        statement($bd, $statement($bd, $table, $values));
     }
     if ($action !== 'yes' && $action !== 'no') {
         //Le damos el valor true a la varibale porque la confirmacion en estos momento esta activa
@@ -408,7 +440,8 @@ function enabledInput($key, $value, $keyword, $update = null, &$matches) {
             //este condicional nos va a controlar que los input se generen disabled para no poder modificarlo
             createInput('name_cliente', $value, toGetType($value), true, false, '', '', getMaxLength($value));
         }
-//                                function createInput($name, $value, $type, $disabled = false, $hidden = false, $class = '', $placeholder = '',$maxlength)
+    } else {
+        createInput($key, $value, '', false, true, '', '', '');
     }
 }
 

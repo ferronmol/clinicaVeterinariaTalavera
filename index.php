@@ -350,7 +350,6 @@
             <img alt="picture" src="./images/sala.jpg" class="img_fresh">
         </section>
     </main>
-    <script src="../js/services.js"></script>
 </body>
 
 </html>

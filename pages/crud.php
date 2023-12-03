@@ -50,7 +50,7 @@ if (isset($_POST['logout'])) {
 ////Condicinal para saber sobre que tabla se esta realizando la consulta
 if (isset($user)) {
     //Función para saber sobre que tabla se esta haciendo referencia
-    $puppies = getRefenceTable(filter_input_array(INPUT_POST), $rol);
+    $puppies = getReferenceTable(filter_input_array(INPUT_POST), $rol);
 
     //declaramos una varible para poder controlar cuando un cliente o una mascota
     //esta bajo una acción del ususario (modificacón o eliminación)
@@ -93,14 +93,14 @@ if (isset($user)) {
         $sql = "select dni,codigo_animal,nombre,edad,peso,codigo_consulta FROM mascotas WHERE dni = ?";
         //Condicional para saber pasar dirtintas palabras claves en función del rol del usuario
         if ($rol == 0) {
-            $mascotas = selectValues($bd, $sql, array($dni));
+            $mascotas = getSelectStatementValues($bd, $sql, array($dni));
         } else {
-            $mascotas = selectValues($bd, $sql, array(htmlspecialchars($_POST['mascotas'])));
+            $mascotas = getSelectStatementValues($bd, $sql, array(htmlspecialchars($_POST['mascotas'])));
         }
     } else {
         //rezlimaos la consulta para sacar por pantalla los nombres de todos los usuarios de la veterinaria
         $sql = "select dni,nombre,apellido,telefono,direccion FROM personas WHERE rol = ?";
-        $clients = selectValues($bd, $sql, array(0));
+        $clients = getSelectStatementValues($bd, $sql, array(0));
     }
 }
 //Cerramos la conexión con la base de datos 

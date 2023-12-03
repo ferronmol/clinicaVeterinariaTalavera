@@ -1,7 +1,7 @@
 <td class='td'>
 
     <?php
-    if($puppies){//Condicinal para saber a que tabla se esta haciendo referencia 
+    if($table == 'mascotas'){//Condicinal para saber a que tabla se esta haciendo referencia 
         //para tratar a los botones en función de la concurrencia con el campo necesario
         $keyValue = $mascota['nombre'];
     }else{
@@ -9,7 +9,7 @@
     }
     //condicinal para controlar que input se va a generar dependiendo de si se ha encontrado el cliente a modificar
 
-    if ($matches) {
+    if ($isMatchingToKey) {
         //Llamamos a la funcion para generar un input mandandole parametros especificos
         createInput('dni', $keyValue, 'text', true, true, 'hidden', '', '', getMaxLength($value));
         //Llamamos a la funcion para generar un boton de confirmar
@@ -20,7 +20,7 @@
     }
     //Llamamos a una funcion para generar el boton de eliminar
     createButton('delete', $keyValue, 'Eliminar', 'bg-danger', $updating);
-    if(!$puppies){
+    if($table == 'personas'){
         createButton('mascotas', $keyValue, 'Macotas', 'bg-primary', $updating);
     }
     

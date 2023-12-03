@@ -12,11 +12,11 @@ if (isset($_POST['login_user'])) {
     try {
         //Primero miramos si existe algun usuario con ese dni
         $sql = "SELECT dni FROM personas WHERE DNI = ?";
-        $results = selectValues($bd, $sql, array($dni));
+        $results = getSelectStatementValues($bd, $sql, array($dni));
         //Condicional para saber si el usuario existe
         if($results->rowCount() == 1){
             $sql = "SELECT dni,rol,nombre FROM personas WHERE DNI = ? AND Clave = ?";
-            $results = selectValues($bd, $sql, array($dni,$password));
+            $results = getSelectStatementValues($bd, $sql, array($dni,$password));
             //Condicional para saber si la consulta nos devulve valores
             if($results->rowCount() == 1){
                 //Cookie session creation

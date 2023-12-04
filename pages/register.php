@@ -76,7 +76,7 @@ include ('../files/conexion.php');
         <div class="input-group">
             <button type="submit" name="reg_user" class="btn">Registrarse</button>
         </div>
-        <p>Si ya estás registrado <a href="login.php">Entrar</a></p>
+        <p>Si ya estás registrado <a href="login.php">Iniciar Sesión</a></p>
     </form>
 </body>
 </html>

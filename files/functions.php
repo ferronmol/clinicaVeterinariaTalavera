@@ -200,7 +200,13 @@ function getReferenceTable($values, $rol) {
     if ($rol == 0)
         return 'mascotas';
 }
-
+/**
+ * funciton to return values for fill options for example these values are a group of mascotas for each persona
+ * 
+ * @param string $keyword
+ * @param string $sql
+ * @return PDO
+ */
 function getOptionsValues($keyword, $sql) {
     $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
     $options = getSelectStatementValues($bd, $sql, array($keyword));
@@ -208,7 +214,11 @@ function getOptionsValues($keyword, $sql) {
     $bd = null;
     return $options;
 }
-
+/**
+ * 
+ * @param type $values
+ * @return array keyword for a statement and function name for creating gspecific query
+ */
 function getAction($values){
     if(isset($values['delete'])){
         return [$values['delete'],'createDeleteStatement'];
@@ -247,7 +257,11 @@ function createInput($name, $value, $type, $disabled = false, $hidden = false, $
         <?php
     }
 }
-
+/**
+ * function to create a group of options element and fill with $value
+ * 
+ * @param array $vaccines
+ */
 function createVaccines($vaccines) {
     foreach ($vaccines as $vacuna) {
         //para cada creamos una etiqueta option y la rellenamos con el nmbre de la vacuna
@@ -313,7 +327,12 @@ function toGetType($value) {
 
     return 'text';
 }
-
+/**
+ * function to return specific maxlength for a input given as parameter dependign of its type
+ * 
+ * @param Array $value
+ * @return string
+ */
 function getMaxLength($value) {
     if ($value == 'codigo_animal' || $value == 'edad' || $value == 'codigo_consulta')
         return '11';
@@ -354,8 +373,6 @@ function createFormInsert($disabled, $table) {
         <?php
         foreach ($fields as $value) {
             if ($value === 'rol') {
-                //SI ESTE VALOR ES DISABLED NO SE ENVIA Y SI ES HIDDEN SE COLOCA EL PRIMERO Y DESCOLOCA TODO ,
-                //SOLUCCION HACER UNA INSERCCION EN LA BASE DE DATOS REFERENCIADNO LOS CAMPOS,
                 createInput($value, 0, toGetType($value), $disabled, false, '', 0, getMaxLength($value));
             } else if ($value === 'clave') {
                 //hay que hacer un metodo para cifrar la contraseña y mostrar axteriscos, a su vez esas claves tienen que meterse en un array o algo para tenerlas
@@ -421,7 +438,15 @@ function managePost($action, $statement, &$confirmationActive, $bd, &$values, $t
         $confirmationActive = true;
     }
 }
-
+/**
+ * function to manage which type of input must be created based on parameters values
+ * 
+ * @param sttring $key
+ * @param string $value
+ * @param string $keyword
+ * @param string $update
+ * @param bool $matches
+ */
 function enabledInput($key, $value, $keyword, $update = null, &$matches) {
     //controlamos con este  if que el dni del cliente no se muestre por pantalla
     if ($key != 'dni') {

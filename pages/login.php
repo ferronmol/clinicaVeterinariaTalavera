@@ -23,7 +23,6 @@ if (createDataBase('exposicion')) {
         <title>Pagina de Inicio de sesión</title>
         <link rel="stylesheet" href="../css/style.css">
         <link rel="stylesheet" href="../css/menu.css">
-        <link rel="stylesheet" href="../css/styleJv.css">
     </head>
 
     <body>

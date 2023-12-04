@@ -14,8 +14,8 @@ function connectionBBDD($cadena, $user = 0, $password = 0) {
         $bd = new PDO($cadena, $user, $password);
         return $bd;
     } catch (Exception $ex) {
-        displayError('La apicación esta en labores de mantenimiento');
-        exit;
+        displayError('La aplicación esta en labores de mantenimiento');
+        exit();
     }
 }
 
@@ -220,6 +220,7 @@ function getAction($values){
         return [$values['commit'],'createUpdateStatement'];
     }
 }
+
 
 
 //funtions about create element****************************************************************************************************************************************

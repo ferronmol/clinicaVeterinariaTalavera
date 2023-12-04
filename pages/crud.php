@@ -3,35 +3,34 @@
 require '../files/functions.php';
 //iniciamos sesion y guardamos el nombre de susuario qeu tenemos en la sesion en una variable una vz filtrado
 session_start();
-//Condicional para examnimar si las varibales de seesion obligatorias existen 
-if (isset($_SESSION['user']) && isset($_SESSION['rol']) && isset($_SESSION['dni'])) {
-    $user = htmlspecialchars($_SESSION['user']);
-    $rol = htmlspecialchars($_SESSION['rol']);
-    $dni = htmlspecialchars($_SESSION['dni']);
-} else { //Se redirige el usuario al index por que ha intentado entrar a la url sin estar identificado
-    header('Location: ./login.php?error');
-    exit;
-}
-//manejo del formulario de estensión de sesión
+require '../lib/allowControl.php';
+
+//Form extend session management*****************************************************************************************************
+
 //Condicional para saber si existe la respuesta al formulario de extensión de sesión
 if (isset($_POST['cookieExtend'])) {
-    if ($_POST['cookieExtend'] === 'yes') { //Condicional para ssaber si la repuesta es positiva para crear una nueva cookie con una duración de un minuto
+    $postCookies = filter_input_array(INPUT_POST);
+    if ($postCookies['cookieExtend'] === 'yes') { //Condicional para ssaber si la repuesta es positiva para crear una nueva cookie con una duración de un minuto
         setcookie(nameSessionCookie(session_id(), $dni), 'session', time() + 1 * 600); //Utilizaciñon del la funcion hash para encriptar la información
         //Redirecionamos a la mims página para que se cree la cookie
         header('Location:./crud.php');
         exit;
     }
-    if ($_POST['cookieExtend'] === 'no') {
+    if ($postCookies['cookieExtend'] === 'no') {
         require 'logOut.php';
         exit;
     }
 }
 //Cookies management*******************************************************************************************************************
-
+//Conditional to check if a cookie with this specific name exists
 if (isset($_COOKIE[nameSessionCookie(session_id(), $dni)])) {
+    //calling function to add more espiration time to session cookie
     setcookie(nameSessionCookie(session_id(), $dni), 'session', time() + 1 * 600, '/');
 }
+//Set value to seesionCookie if specific session cookie exists or nul if it does not
 $sessionCookie = isset($_COOKIE[nameSessionCookie(session_id(), $dni)]) ? $_COOKIE[nameSessionCookie(session_id(), $dni)] : null;
+
+//Set value to seesionCookie if specific las visit cookie exists or nul if it does not
 $lastVisit = isset($_COOKIE[nameSessionCookie('', $dni)]) ? $_COOKIE[nameSessionCookie('', $dni)] : null;
 
 //condicional para saber si la cookie de sesion ha expirado y preguntar al usuario si quiere ectender su sesión
@@ -49,54 +48,42 @@ if (isset($_POST['logout'])) {
 
 ////Condicinal para saber sobre que tabla se esta realizando la consulta
 if (isset($user)) {
-    //Función para saber sobre que tabla se esta haciendo referencia
-    $puppies = getReferenceTable(filter_input_array(INPUT_POST), $rol);
+    //Function to get reference table to make statement on
+    $table = getReferenceTable(filter_input_array(INPUT_POST), $rol);
 
     //declaramos una varible para poder controlar cuando un cliente o una mascota
     //esta bajo una acción del ususario (modificacón o eliminación)
-    $matches = false;
+    $isMatchingToKey = false;
     //con esta variable vamos a controlar si el usuario esta en un update para poner a disabled 
     //todos los elementos de la pantalla menos los elementos afectados por el update
     $updating = false;
     //Declaramos una variable para saber cuando solo tenemos que cargar el formulario de confirmacion
     $confirmationActive = false;
+
+    //Calling function to generate connection to a databse and storage the object ut returns into $bd variable
     $bd = connectionBBDD('mysql:dbname=exposicion;host=127.0.0.1', 'root', '');
-    //Condicinal para saber si nos llega información desde post y filtramos el formulario que nos viene
+    //Conditional to check if exist info send by post and filtering at the same time
     if (filter_input_array(INPUT_POST)) {
+        //Guardamos en una varibale lo que nos viene por post
+        $postValues = filter_input_array(INPUT_POST);
         //Condicional para saber si se estan en la zona de mascotas o usuarios,
         // para hacer la consulta sobre la tabla corresta
-        if ($puppies) {
-            $table = 'mascotas';
-        } else {
-            $table = 'personas';
-        }
-        if (isset($_POST['update'])) { //condicional para cuando recibimos una peticion de modificación
-            $update = htmlspecialchars($_POST['update']);
-            echo 'esto es lo que vale la varibale update cuando entro con mascota ' . $update;
+
+        if (isset($postValues['update'])) { //condicional para cuando recibimos una peticion de modificación
+            $keyUpdatingElement = $postValues['update'];
             $updating = true;
         }
-        if (isset($_POST['delete'])) { //condicional para cuando recibimos una peticion de eliminación
-            $delete = htmlspecialchars($_POST['delete']);
-            managePost($delete, 'createDeleteStatement', $confirmationActive, $bd, $_POST, $table);
-        }
-        if (isset($_POST['commit'])) { //condicional para cuando recibimos una peticion de confirmación
-            $commit = htmlspecialchars($_POST['commit']);
-            managePost($commit, 'createUpdateStatement', $confirmationActive, $bd, $_POST, $table);
-        }
-        if (isset($_POST['insert'])) { //condicional para cuando recibimos una peticion de insercción
-            $insert = htmlspecialchars($_POST['insert']);
-            //Condicional para detectar si se quiere insertar una mascotas
-            managePost($insert, 'createInsertStatement', $confirmationActive, $bd, $_POST, $table);
+        if (isset($postValues['delete']) || isset($postValues['insert']) || isset($postValues['commit'])) {
+            managePost(getAction($postValues)[0], getAction($postValues)[1], $confirmationActive, $bd, $postValues, $table);
         }
     }
-    if ($puppies) { //Conditional to check if user pushed puppies button to make statement about puppies
-        $sql = "select dni,codigo_animal,nombre,edad,peso,codigo_consulta FROM mascotas WHERE dni = ?";
+    if ($table == 'mascotas') { //Conditional to check if user pushed puppies button to make statement about puppies
+        $sql = "select dni,codigo_animal,nombre,raza,edad,peso FROM mascotas WHERE dni = ?";
         //Condicional para saber pasar dirtintas palabras claves en función del rol del usuario
-        if ($rol == 0) {
-            $mascotas = getSelectStatementValues($bd, $sql, array($dni));
-        } else {
-            $mascotas = getSelectStatementValues($bd, $sql, array(htmlspecialchars($_POST['mascotas'])));
+        if (isset($postValues['dni'])) {
+            $dni = $postValues['dni'];
         }
+        $mascotas = getSelectStatementValues($bd, $sql, array($dni));
     } else {
         //rezlimaos la consulta para sacar por pantalla los nombres de todos los usuarios de la veterinaria
         $sql = "select dni,nombre,apellido,telefono,direccion FROM personas WHERE rol = ?";
@@ -114,8 +101,8 @@ $bd = null;
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/stylesJv.css">
-    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/menu.css">
+    <link rel="stylesheet" href="../css/style.css">
     <title>CRUD</title>
 </head>
 
@@ -141,8 +128,8 @@ $bd = null;
                     <a href="./login.php" class="nav__link"><span class="char">A</span>cceso</a>
                     <!-- Botón de Cerrar Sesión -->
                     <form action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
-                        <button class="btn bg-primary" name="logout" type="submit" value="logout">
-                            <span class="bi bi-box-arrow-right"></span> Cerrar Sesión
+                        <button class="btn bg-primary btn-mb" name="logout" type="submit" value="logout">
+                            <span class="bi bi-box-arrow-right "></span> Cerrar Sesión
                         </button>
                     </form>
                 </li>
@@ -173,10 +160,10 @@ $bd = null;
             //Cargamos el fichero de confirmacionForm.php
             require './confirmationForm.php';
         } else {
-            if ($puppies) {
+            if ($table == 'mascotas') {
                 require '../pages/puppies.php';
             } else {
-                if (!$puppies) {
+                if ($table == 'personas') {
                     require '../pages/users.php';
                 }
             }
@@ -185,5 +172,4 @@ $bd = null;
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
     </div>
 </body>
-
 </html>

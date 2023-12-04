@@ -142,6 +142,16 @@ body {
 .char--logo {
   font-size: 3rem;
 }
+.error , .error-message {
+  width: 92%;
+  margin: 0px auto;
+  padding: 10px;
+  border: 1px solid #a94442;
+  color: #a94442;
+  background: #f2dede;
+  border-radius: 5px;
+  text-align: left;
+}
 
 @media (min-width: 768px) {
   .nav {

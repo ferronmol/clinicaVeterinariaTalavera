@@ -232,7 +232,7 @@ function getAction($values){
  * @param boolean $disabled
  * @param boolean $hidden
  */
-function createInput($name, $value, $type, $disabled = false, $hidden = false, $class = '', $placeholder = '', $maxlength) {
+function createInput($name, $value, $type, $disabled = false, $hidden = false, $class = '', $placeholder = '', $maxlength = '') {
     $disabled = ($disabled) ? 'disabled' : '';
     $hidden = ($hidden) ? 'hidden' : '';
     if ($hidden === 'hidden') {
